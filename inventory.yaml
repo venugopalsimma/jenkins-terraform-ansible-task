@@ -9,16 +9,16 @@
       "vars": {}
     "backend":
       "hosts":
-        "ip-172-31-31-79.ec2.internal":
+        "ip-172-31-23-185.ec2.internal":
           "Name": "c8.local"
-          "ansible_host": "54.174.215.80"
+          "ansible_host": "54.85.38.123"
       "vars":
         "interface": "private"
     "frontend":
       "hosts":
-        "ec2-54-83-227-113.compute-1.amazonaws.com":
+        "ec2-52-20-212-232.compute-1.amazonaws.com":
           "Name": "u21.local"
-          "ansible_host": "54.83.227.113"
+          "ansible_host": "52.20.212.232"
       "vars":
         "interface": "public"
     "gcp":
