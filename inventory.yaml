@@ -1,32 +1,4 @@
----
-"all":
-  "children":
-    "aws":
-      "hosts": {}
-      "vars": {}
-    "azr":
-      "hosts": {}
-      "vars": {}
-    "backend":
-      "hosts":
-        "ip-172-31-23-185.ec2.internal":
-          "Name": "c8.local"
-          "ansible_host": "54.85.38.123"
-      "vars":
-        "interface": "private"
-    "frontend":
-      "hosts":
-        "ec2-52-20-212-232.compute-1.amazonaws.com":
-          "Name": "u21.local"
-          "ansible_host": "52.20.212.232"
-      "vars":
-        "interface": "public"
-    "gcp":
-      "hosts": {}
-      "vars": {}
-    "vsp":
-      "hosts": {}
-      "vars": {}
-  "hosts": {}
-  "vars": {}
-
+[frontend]
+54.146.202.145
+[backend]
+34.234.79.216

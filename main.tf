@@ -2,26 +2,57 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_instance" "frontend" {
-  ami           = "ami-05c13eab67c5d8861"
-  instance_type = "t2.micro"
-  key_name      = "linux"
+resource "aws_instance" "backend" {
+  ami                    = "ami-0fc5d935ebf8bc3bc"
+  instance_type          = "t2.micro"
+  key_name               = "ubuntu-key"
   vpc_security_group_ids = ["sg-04cb5f715d70d6f35"]
   tags = {
     Name = "u21.local"
   }
+  user_data = <<-EOF
+  #!/bin/bash
+  sudo hostnamectl set-hostname U21.local
+  netdata_conf="/etc/netdata/netdata.conf"
+  # Path to netdata.conf
+  actual_ip=0.0.0.0
+  # Use sed to replace the IP address in netdata.conf
+  sudo sed -i "s/bind socket to IP = .*$/bind socket to IP = $actual_ip/" "$netdata_conf"
+EOF
+
 }
 
-resource "aws_instance" "backend" {
-  ami           = "ami-0fc5d935ebf8bc3bc"
-  instance_type = "t2.micro"
-  key_name      = "ubuntu-key"
+resource "aws_instance" "frontend" {
+  ami                    = "ami-05c13eab67c5d8861"
+  instance_type          = "t2.micro"
+  key_name               = "linux"
   vpc_security_group_ids = ["sg-04cb5f715d70d6f35"]
   tags = {
     Name = "c8.local"
   }
+  user_data = <<-EOF
+  #!/bin/bash
+  # New hostname and IP address
+  sudo hostnamectl set-hostname c8.local
+  hostname=$(hostname)
+  public_ip="$(curl -s https://api64.ipify.org?format=json | jq -r .ip)"
+
+  # Path to /etc/hosts
+  echo "${aws_instance.backend.public_ip} $hostname" | sudo tee -a /etc/hosts
+
+EOF
+depends_on = [aws_instance.backend]
 }
 
+resource "local_file" "inventory" {
+  filename = "./inventory.yaml"
+  content  = <<EOF
+[frontend]
+${aws_instance.frontend.public_ip}
+[backend]
+${aws_instance.backend.public_ip}
+EOF
+}
 
 output "frontend_public_ip" {
   value = aws_instance.frontend.public_ip
@@ -29,32 +60,4 @@ output "frontend_public_ip" {
 
 output "backend_public_ip" {
   value = aws_instance.backend.public_ip
-}
-
-
-module "ansible_inv" {
-  source  = "mschuchard/ansible-inv/local"
-  version = "~> 1.1.2"
-
-  formats   = ["yaml"]
-  instances = {
-    "frontend" = [
-      {
-        name = aws_instance.frontend.public_dns
-        ip   = aws_instance.frontend.public_ip
-        vars = aws_instance.frontend.tags
-      }
-    ],
-    "backend" = [
-      {
-        name = aws_instance.backend.private_dns
-        ip   = aws_instance.backend.public_ip
-        vars = aws_instance.backend.tags
-      }
-    ]
-  }
-  group_vars = {
-    "frontend" = { "interface" = "public" }
-    "backend"  = { "interface" = "private" }
-  }
 }

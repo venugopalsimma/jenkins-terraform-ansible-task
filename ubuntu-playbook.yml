@@ -12,12 +12,28 @@
         name: netdata
         state: present
       become: true
+      
+    - name: Update netdata.conf with the desired bind IP
+      become: yes
+      lineinfile:
+        path: /etc/netdata/netdata.conf
+        regexp: '^bind socket to IP ='
+        line: 'bind socket to IP = 0.0.0.0'
+      notify:
+        - restart netdata
 
     - name: Start Netdata service
       service:
         name: netdata
         state: started
         enabled: yes
+
+    - name: configure Netdata configuration file
+      template:
+        src: netdata.conf.j2
+        dest: /etc/netdata/netdata.conf
+      notify:
+        - restart netdata
 
     - name: Open port 19999 in firewall
       ufw:
@@ -26,3 +42,9 @@
         proto: tcp
       become: true
       when: ansible_service_mgr == 'systemd'  # Adjust based on the init system used by your target servers
+
+  handlers:
+    - name: restart Netdata
+      systemd:
+        name: netdata
+        state: restarted
