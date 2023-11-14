@@ -17,7 +17,7 @@ pipeline {
                 script {
                     dir('/var/lib/jenkins/workspace/smaple/ansibletask') {
                     sh 'pwd'
-                    sh 'terraform init'
+                    sh 'terraform init -reconfigure'
                     sh 'terraform validate'
                     // sh 'terraform destroy -auto-approve'
                     sh 'terraform plan'
