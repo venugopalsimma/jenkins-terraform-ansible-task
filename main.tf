@@ -13,11 +13,11 @@ resource "aws_instance" "backend" { #ubuntu.yaml NETADATA
   user_data = <<-EOF
   #!/bin/bash
   sudo hostnamectl set-hostname U21.local
-  netdata_conf="/etc/netdata/netdata.conf"
+  # netdata_conf="/etc/netdata/netdata.conf"
   # Path to netdata.conf
-  actual_ip=0.0.0.0
+  # actual_ip=0.0.0.0
   # Use sed to replace the IP address in netdata.conf
-  sudo sed -i "s/bind socket to IP = .*$/bind socket to IP = $actual_ip/" "$netdata_conf"
+  # sudo sed -i "s/bind socket to IP = .*$/bind socket to IP = $actual_ip/" "$netdata_conf"
 EOF
 
 }
