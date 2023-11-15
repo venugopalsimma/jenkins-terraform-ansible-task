@@ -2,12 +2,10 @@
 - hosts: backend
   become: true
   tasks:
-    - name: Install Netdata
+- name: Install Netdata
       become: yes
-      apt:
-        name: netdata
-        state: present
-      when: ansible_os_family == 'Debian'  # Adjust for other package managers
+      command: bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+      when: ansible_os_family == 'Debian'
 
     - name: Start Netdata service
       become: yes
