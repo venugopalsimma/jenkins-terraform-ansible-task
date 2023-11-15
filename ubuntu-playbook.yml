@@ -4,8 +4,14 @@
   tasks:
     - name: Install Netdata
       become: yes
-      command: bash <(curl -Ss https://my-netdata.io/kickstart.sh)
-      when: ansible_os_family == 'Debian'
+      get_url:
+        url: "https://my-netdata.io/kickstart.sh"
+        dest: "/tmp/netdata-install.sh"
+        mode: 0755
+
+    - name: Execute Netdata installation script
+      become: yes
+      command: "/tmp/netdata-install.sh"
 
     - name: Start Netdata service
       become: yes
