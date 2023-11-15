@@ -2,17 +2,20 @@
 - hosts: backend
   become: true
   tasks:
-    - name: Update apt cache (for Debian/Ubuntu systems)
-      apt:
-        update_cache: yes
-      when: ansible_os_family == 'Debian'
-
     - name: Install Netdata
-      package:
+      become: yes
+      apt:
         name: netdata
         state: present
-      become: true
-      
+      when: ansible_os_family == 'Debian'  # Adjust for other package managers
+
+    - name: Start Netdata service
+      become: yes
+      service:
+        name: netdata
+        state: started
+        enabled: yes
+
     - name: Update netdata.conf with the desired bind IP
       become: yes
       lineinfile:
@@ -22,29 +25,9 @@
       notify:
         - restart netdata
 
-    - name: Start Netdata service
-      service:
-        name: netdata
-        state: started
-        enabled: yes
-
-    - name: configure Netdata configuration file
-      template:
-        src: netdata.conf.j2
-        dest: /etc/netdata/netdata.conf
-      notify:
-        - restart netdata
-
-    - name: Open port 19999 in firewall
-      ufw:
-        rule: allow
-        port: 19999
-        proto: tcp
-      become: true
-      when: ansible_service_mgr == 'systemd'  # Adjust based on the init system used by your target servers
-
   handlers:
-    - name: restart Netdata
-      systemd:
+    - name: restart netdata
+      become: yes
+      service:
         name: netdata
         state: restarted
